@@ -1,0 +1,33 @@
+[tool.ruff]
+# Ruff configuration for Extracta project
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# Enable key rule categories
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+
+# Ignore specific rules that conflict with project style
+ignore = [
+    "E501",   # line too long (handled by line-length setting)
+    "B008",   # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test files can have longer lines and assert statements
+"tests/**/*.py" = ["E501", "B011"]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Indent with 4 spaces
+indent-style = "space"
