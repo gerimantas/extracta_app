@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://extracta.local/schemas/log-event.schema.json",
+  "title": "PipelineLogEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ts", "stage", "status", "in_count", "out_count", "error_count", "duration_ms"],
+  "properties": {
+    "ts": {"type": "string"},
+    "stage": {"type": "string", "enum": ["ingestion", "extraction", "validation", "normalization", "persistence", "reporting", "categorization"]},
+    "status": {"type": "string", "enum": ["success", "error", "partial", "duplicate"]},
+    "in_count": {"type": "integer", "minimum": 0},
+    "out_count": {"type": "integer", "minimum": 0},
+    "error_count": {"type": "integer", "minimum": 0},
+    "duration_ms": {"type": "integer", "minimum": 0},
+    "source_file": {"type": "string"},
+    "normalization_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "exception_type": {"type": "string"},
+    "message": {"type": "string"},
+    "stack_excerpt": {"type": "string"}
+  }
+}

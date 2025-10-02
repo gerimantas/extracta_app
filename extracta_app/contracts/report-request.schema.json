@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://extracta.local/schemas/report-request.schema.json",
+  "title": "ReportRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["filters", "grouping", "aggregation", "view_mode"],
+  "properties": {
+    "filters": {
+      "type": "object",
+      "required": ["date_range", "transaction_type", "categories", "counterparty"],
+      "additionalProperties": false,
+      "properties": {
+        "date_range": {
+          "type": "object",
+          "required": ["start", "end"],
+            "additionalProperties": false,
+            "properties": {
+              "start": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+              "end": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"}
+            }
+        },
+        "transaction_type": {"type": "string", "enum": ["income", "expense", "all"]},
+        "categories": {"type": "array", "items": {"type": "string"}, "uniqueItems": false},
+        "counterparty": {"type": "string"}
+      }
+    },
+    "grouping": {"type": "array", "items": {"type": "string", "enum": ["category_id", "counterparty", "month", "year", "source_file"]}, "uniqueItems": false},
+    "aggregation": {
+      "type": "object",
+      "required": ["field", "func"],
+      "additionalProperties": false,
+      "properties": {
+        "field": {"type": "string", "enum": ["amount_in", "amount_out"]},
+        "func": {"type": "string", "enum": ["sum", "avg", "count"]}
+      }
+    },
+    "view_mode": {"type": "string", "enum": ["table", "chart"]}
+  }
+}

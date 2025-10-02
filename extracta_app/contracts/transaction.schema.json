@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://extracta.local/schemas/transaction.schema.json",
+  "title": "Transaction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transaction_id",
+    "transaction_date",
+    "description",
+    "amount_in",
+    "amount_out",
+    "counterparty",
+    "source_file",
+    "source_file_hash",
+    "normalization_hash",
+    "mapping_version",
+    "logic_version",
+    "year",
+    "month",
+    "created_at"
+  ],
+  "properties": {
+    "transaction_id": {"type": "string", "minLength": 1},
+    "transaction_date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "description": {"type": "string", "minLength": 1},
+    "amount_in": {"type": "number", "minimum": 0},
+    "amount_out": {"type": "number", "minimum": 0},
+    "counterparty": {"type": "string"},
+    "category_id": {"type": ["string", "null"]},
+    "source_file": {"type": "string", "minLength": 1},
+    "source_file_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "normalization_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "mapping_version": {"type": "string", "minLength": 1},
+    "logic_version": {"type": "string", "minLength": 1},
+    "year": {"type": "integer", "minimum": 1900, "maximum": 9999},
+    "month": {"type": "string", "pattern": "^\\d{4}-\\d{2}$"},
+    "created_at": {"type": "string"}
+  },
+  "oneOf": [
+    {"properties": {"amount_in": {"exclusiveMinimum": 0}, "amount_out": {"const": 0}}},
+    {"properties": {"amount_out": {"exclusiveMinimum": 0}, "amount_in": {"const": 0}}},
+    {"properties": {"amount_in": {"const": 0}, "amount_out": {"const": 0}}}
+  ]
+}
