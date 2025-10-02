@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 from src.ingestion.router import detect_file_type
+from src.logging.json_logger import emit_log_event
 # Import extractor modules (not symbols) so tests can monkeypatch their
 # public functions via sys.modules lookups before calling ingest_file.
 from src.extraction import pdf_extractor, image_extractor  # type: ignore
@@ -28,23 +29,53 @@ def _file_sha256(path: Path) -> str:
 
 def ingest_file(path_str: str) -> Dict[str, Any]:
     path = Path(path_str)
-    if not path.exists():  # early safety
-        raise FileNotFoundError(path)
-    file_type = detect_file_type(path.name)
-    if file_type == "pdf":
-        rows = pdf_extractor.extract_raw_rows(str(path))  # type: ignore[attr-defined]
-        method = "pdf"
-    else:
-        rows = image_extractor.extract_raw_rows(str(path))  # type: ignore[attr-defined]
-        method = "image"
-    artifact = {
-        "source_file": path.name,
-        "source_file_hash": _file_sha256(path),
-        "extraction_method": method,
-        "extracted_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "record_count_raw": len(rows),
-        "rows": rows,
-    }
-    return artifact
+    start_time = time.time()
+    
+    try:
+        if not path.exists():  # early safety
+            raise FileNotFoundError(path)
+        file_type = detect_file_type(path.name)
+        if file_type == "pdf":
+            rows = pdf_extractor.extract_raw_rows(str(path))  # type: ignore[attr-defined]
+            method = "pdf"
+        else:
+            rows = image_extractor.extract_raw_rows(str(path))  # type: ignore[attr-defined]
+            method = "image"
+        artifact = {
+            "source_file": path.name,
+            "source_file_hash": _file_sha256(path),
+            "extraction_method": method,
+            "extracted_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "record_count_raw": len(rows),
+            "rows": rows,
+        }
+        
+        # Log successful ingestion
+        emit_log_event({
+            "stage": "ingestion",
+            "status": "success",
+            "in_count": 1,
+            "out_count": len(rows),
+            "error_count": 0,
+            "duration_ms": int((time.time() - start_time) * 1000),
+            "source_file": path.name
+        })
+        
+        return artifact
+        
+    except Exception as e:
+        # Log failed ingestion
+        emit_log_event({
+            "stage": "ingestion",
+            "status": "error",
+            "in_count": 1,
+            "out_count": 0,
+            "error_count": 1,
+            "duration_ms": int((time.time() - start_time) * 1000),
+            "source_file": path.name,
+            "exception_type": type(e).__name__,
+            "message": str(e)
+        })
+        raise
 
 __all__ = ["ingest_file"]

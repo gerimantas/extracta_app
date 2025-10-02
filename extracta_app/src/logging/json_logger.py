@@ -12,6 +12,12 @@ from pathlib import Path
 from typing import Any, Dict
 
 
+def emit_log_event(event_data: Dict[str, Any]) -> None:
+    """Emit a log event using the default logger instance."""
+    logger = JsonLogger(Path("logs/pipeline.log"))
+    logger.emit(event_data)
+
+
 @dataclass
 class JsonLogger:
     path: Path

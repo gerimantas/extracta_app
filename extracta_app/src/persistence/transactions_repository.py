@@ -6,7 +6,10 @@ Idempotency: duplicate primary keys ignored (INSERT OR IGNORE).
 from __future__ import annotations
 
 import sqlite3
+import time
 from typing import Iterable, Dict, Any, List, Optional
+
+from src.logging.json_logger import emit_log_event
 
 TX_COLUMNS = [
     "transaction_id",
@@ -37,24 +40,63 @@ def bulk_insert_transactions(db_path: str, rows: Iterable[Dict[str, Any]]) -> in
 
     Duplicate transaction_id rows are ignored.
     """
+    start_time = time.time()
     rows_list = list(rows)
-    if not rows_list:
-        return 0
-    con = sqlite3.connect(db_path)
+    
     try:
-        cur = con.executemany(
-            INSERT_SQL,
-            [
+        if not rows_list:
+            # Log empty persistence
+            emit_log_event({
+                "stage": "persistence",
+                "status": "success",
+                "in_count": 0,
+                "out_count": 0,
+                "error_count": 0,
+                "duration_ms": int((time.time() - start_time) * 1000)
+            })
+            return 0
+            
+        con = sqlite3.connect(db_path)
+        try:
+            cur = con.executemany(
+                INSERT_SQL,
                 [
-                    r.get(col) for col in TX_COLUMNS
-                ]
-                for r in rows_list
-            ],
-        )
-        con.commit()
-        return cur.rowcount if cur.rowcount is not None else 0
-    finally:
-        con.close()
+                    [
+                        r.get(col) for col in TX_COLUMNS
+                    ]
+                    for r in rows_list
+                ],
+            )
+            con.commit()
+            inserted_count = cur.rowcount if cur.rowcount is not None else 0
+            
+            # Log successful persistence
+            emit_log_event({
+                "stage": "persistence",
+                "status": "success",
+                "in_count": len(rows_list),
+                "out_count": inserted_count,
+                "error_count": 0,
+                "duration_ms": int((time.time() - start_time) * 1000)
+            })
+            
+            return inserted_count
+        finally:
+            con.close()
+            
+    except Exception as e:
+        # Log failed persistence
+        emit_log_event({
+            "stage": "persistence",
+            "status": "error",
+            "in_count": len(rows_list) if rows_list else 0,
+            "out_count": 0,
+            "error_count": 1,
+            "duration_ms": int((time.time() - start_time) * 1000),
+            "exception_type": type(e).__name__,
+            "message": str(e)
+        })
+        raise
 
 
 def get_transactions(db_path: str, *, limit: Optional[int] = None) -> List[Dict[str, Any]]:
