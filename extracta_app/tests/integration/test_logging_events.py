@@ -17,8 +17,8 @@ class TestLoggingEvents:
     def test_pipeline_stages_emit_schema_valid_logs(self):
         """Test that each pipeline stage emits schema-valid log lines."""
         # Load log event schema
-        schema_path = Path("contracts/log-event.schema.json")
-        with open(schema_path) as f:
+        schema_path = Path("extracta_app/contracts/log-event.schema.json")
+        with open(schema_path, encoding="utf-8") as f:
             log_schema = json.load(f)
 
         # Create temporary test file
@@ -38,7 +38,7 @@ class TestLoggingEvents:
             # Read log events from actual log file
             log_events = []
             if log_file.exists():
-                with open(log_file) as f:
+                with open(log_file, encoding="utf-8") as f:
                     for line in f:
                         if line.strip():
                             log_events.append(json.loads(line.strip()))

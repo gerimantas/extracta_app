@@ -15,7 +15,7 @@ class TestRepeatRunDeterminism:
     def test_identical_runs_produce_same_hashes_and_counts(self):
         """Test that two runs of same file produce identical normalization hashes & row counts."""
         # Use existing test fixture instead of temporary file
-        fixture_path = "tests/fixtures/sample_statement.pdf"
+        fixture_path = "extracta_app/tests/fixtures/sample_statement.pdf"
 
         if not Path(fixture_path).exists():
             # Skip test if fixture doesn't exist

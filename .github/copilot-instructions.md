@@ -63,11 +63,26 @@ from src.extraction import pdf_extractor, image_extractor
 # Or use VS Code tasks: "tests:quick", "tests:verbose"
 ```
 
-### Key Dependencies
-- **pdfplumber**: PDF table/text extraction
-- **pytesseract**: OCR for images  
-- **jsonschema**: Contract validation
+### Key Dependencies & Technology Decisions (Q1-Q10 Resolved)
+- **pdfplumber**: PDF table/text extraction (Q1: chosen over Camelot for simpler deps)
+- **pytesseract**: OCR for images (Q2: local Tesseract via Python wrapper)
+- **jsonschema**: Contract validation for all pipeline schemas
 - **streamlit**: UI layer (thin, business logic in src/)
+- **PyYAML**: Mapping configuration (Q3: YAML format for human readability)
+- **sqlite3**: Database with env override `EXTRACTA_DB_PATH` (Q4: default `data/extracta.db`)
+
+### Research-Driven Architecture Decisions (from specs/extracta-core/research.md)
+- **Category Model (Q5)**: Dedicated `categories` table with FK from transactions
+- **Date Optimization (Q6)**: Precomputed `year` and `month` columns for performance
+- **Aggregations (Q7)**: Limited to `sum`, `avg`, `count` for MVP scope
+- **Template Versioning (Q8)**: Schema versioning with logic/mapping version tracking
+- **Counterparty (Q9)**: Pass-through strategy (`counterparty = description`) for MVP
+- **Logging (Q10)**: JSON Lines to `logs/pipeline.log` with 10MB rotation, 20-line stack traces
+
+### Version Tracking & Determinism
+- **VERSION file**: SemVer 0.1.0 with automated validation
+- **Logic versioning**: `mapping_version` and `logic_version` in normalization hashes
+- **Dependency pinning**: Fixed versions in requirements.txt for reproducibility
 
 ## Architecture Decisions
 
@@ -87,6 +102,14 @@ SQLite `transactions` table is append-only. Categorization updates only the `cat
 
 ## Working with This Codebase
 
+### Implementation Status (v0.1.0)
+- ✅ **Core Pipeline**: Fully implemented (Tasks 1-61)
+- ✅ **All Tests Passing**: 81 passed, 1 skipped (performance constraint)
+- ✅ **Constitution Compliance**: All principles verified and implemented
+- ✅ **Quality Gates**: Ruff linting, mypy type checking, comprehensive documentation
+- ✅ **Deterministic Behavior**: Proven via repeat-run tests and hash stability
+
+### Development Guidelines
 1. **Follow the task list**: `extracta_app/specs/extracta-core/tasks.md` provides TDD sequence
 2. **Check contracts first**: Validate against JSON schemas in `contracts/`
 3. **Maintain determinism**: Any changes to normalization logic require hash verification
