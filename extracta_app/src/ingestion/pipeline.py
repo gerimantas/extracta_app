@@ -13,8 +13,9 @@ from pathlib import Path
 from typing import Dict, Any
 
 from src.ingestion.router import detect_file_type
-from src.extraction.pdf_extractor import extract_raw_rows as extract_pdf
-from src.extraction.image_extractor import extract_raw_rows as extract_image
+# Import extractor modules (not symbols) so tests can monkeypatch their
+# public functions via sys.modules lookups before calling ingest_file.
+from src.extraction import pdf_extractor, image_extractor  # type: ignore
 
 
 def _file_sha256(path: Path) -> str:
@@ -31,10 +32,10 @@ def ingest_file(path_str: str) -> Dict[str, Any]:
         raise FileNotFoundError(path)
     file_type = detect_file_type(path.name)
     if file_type == "pdf":
-        rows = extract_pdf(str(path))
+        rows = pdf_extractor.extract_raw_rows(str(path))  # type: ignore[attr-defined]
         method = "pdf"
     else:
-        rows = extract_image(str(path))
+        rows = image_extractor.extract_raw_rows(str(path))  # type: ignore[attr-defined]
         method = "image"
     artifact = {
         "source_file": path.name,
