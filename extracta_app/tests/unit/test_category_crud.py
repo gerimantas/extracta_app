@@ -1,5 +1,6 @@
-from pathlib import Path
 import uuid
+from pathlib import Path
+
 import pytest
 
 try:
@@ -15,11 +16,11 @@ except ImportError:
 
 try:
     from src.categorization.service import (
+        assign_category,
         create_category,
+        delete_category,
         list_categories,
         rename_category,
-        assign_category,
-        delete_category,
     )  # type: ignore
 except ImportError:
     create_category = list_categories = rename_category = assign_category = delete_category = None  # type: ignore

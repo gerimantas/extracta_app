@@ -12,7 +12,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import yaml
 
@@ -20,9 +19,9 @@ import yaml
 @dataclass
 class MappingConfig:
     version: str
-    synonyms: Dict[str, List[str]]  # canonical -> synonym list
-    rules: Dict[str, str]  # original header -> canonical
-    file_overrides: List[dict]
+    synonyms: dict[str, list[str]]  # canonical -> synonym list
+    rules: dict[str, str]  # original header -> canonical
+    file_overrides: list[dict]
 
 
 def load_mapping_config(path: Path) -> MappingConfig:
@@ -36,17 +35,17 @@ def load_mapping_config(path: Path) -> MappingConfig:
     return MappingConfig(version=version, synonyms=synonyms, rules=rules, file_overrides=file_overrides)
 
 
-def _build_synonym_lookup(cfg: MappingConfig) -> Dict[str, str]:
-    lookup: Dict[str, str] = {}
+def _build_synonym_lookup(cfg: MappingConfig) -> dict[str, str]:
+    lookup: dict[str, str] = {}
     for canonical, syns in cfg.synonyms.items():
         for s in syns:
             lookup[s.lower()] = canonical
     return lookup
 
 
-def resolve_headers(headers: List[str], source_file: str, config: MappingConfig) -> Dict[str, Optional[str]]:
+def resolve_headers(headers: list[str], source_file: str, config: MappingConfig) -> dict[str, str | None]:
     """Resolve a list of headers to canonical names using precedence rules."""
-    result: Dict[str, Optional[str]] = {h: None for h in headers}
+    result: dict[str, str | None] = dict.fromkeys(headers)
     lower_rules = {k.lower(): v for k, v in config.rules.items()}
     synonym_lookup = _build_synonym_lookup(config)
 

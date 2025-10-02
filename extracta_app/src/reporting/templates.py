@@ -9,19 +9,19 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from typing import Optional, Dict, Any, List
+from typing import Any
 
 
 def _connect(db_path: str) -> sqlite3.Connection:
     return sqlite3.connect(db_path)
 
 
-def _canonical_json(d: Dict[str, Any]) -> str:
+def _canonical_json(d: dict[str, Any]) -> str:
     # Stable ordering & separators for deterministic comparison
     return json.dumps(d, sort_keys=True, separators=(",", ":"))
 
 
-def save_template(db_path: str, name: str, definition: Dict[str, Any]) -> int:
+def save_template(db_path: str, name: str, definition: dict[str, Any]) -> int:
     if not name.strip():
         raise ValueError("Template name required")
     cj = _canonical_json(definition)
@@ -53,7 +53,7 @@ def save_template(db_path: str, name: str, definition: Dict[str, Any]) -> int:
         con.close()
 
 
-def get_template_by_name(db_path: str, name: str) -> Optional[Dict[str, Any]]:
+def get_template_by_name(db_path: str, name: str) -> dict[str, Any] | None:
     con = _connect(db_path)
     try:
         cur = con.execute(
@@ -74,13 +74,13 @@ def get_template_by_name(db_path: str, name: str) -> Optional[Dict[str, Any]]:
         con.close()
 
 
-def list_templates(db_path: str) -> List[Dict[str, Any]]:
+def list_templates(db_path: str) -> list[dict[str, Any]]:
     con = _connect(db_path)
     try:
         cur = con.execute(
             "SELECT template_id, name, definition_json, created_at, updated_at FROM report_templates ORDER BY name"
         )
-        out: List[Dict[str, Any]] = []
+        out: list[dict[str, Any]] = []
         for row in cur.fetchall():
             out.append(
                 {

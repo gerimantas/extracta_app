@@ -14,13 +14,13 @@ Supported group fields: month, year, category_id
 """
 from __future__ import annotations
 
-from typing import Dict, Any, List, Tuple
+from typing import Any
 
 ALLOWED_FUNCS = {"sum", "count", "avg"}
 ALLOWED_GROUP_FIELDS = {"month", "year", "category_id"}
 
 
-def build_report_query(request: Dict[str, Any]) -> Tuple[str, List[Any]]:
+def build_report_query(request: dict[str, Any]) -> tuple[str, list[Any]]:
     filters = request.get("filters", {}) or {}
     grouping = request.get("grouping", []) or []
     aggregations = request.get("aggregations", []) or []
@@ -28,15 +28,15 @@ def build_report_query(request: Dict[str, Any]) -> Tuple[str, List[Any]]:
     if not aggregations:
         raise ValueError("At least one aggregation required")
 
-    select_parts: List[str] = []
-    group_fields: List[str] = []
+    select_parts: list[str] = []
+    group_fields: list[str] = []
     for g in grouping:
         if g not in ALLOWED_GROUP_FIELDS:
             raise ValueError(f"Unsupported group field: {g}")
         select_parts.append(g)
         group_fields.append(g)
 
-    agg_selects: List[str] = []
+    agg_selects: list[str] = []
     for agg in aggregations:
         field = agg["field"]
         func = agg["func"].lower()
@@ -53,8 +53,8 @@ def build_report_query(request: Dict[str, Any]) -> Tuple[str, List[Any]]:
 
     sql = f"SELECT {select_clause} FROM transactions"
 
-    where_clauses: List[str] = []
-    params: List[Any] = []
+    where_clauses: list[str] = []
+    params: list[Any] = []
     if "date_from" in filters:
         where_clauses.append("transaction_date >= ?")
         params.append(filters["date_from"])

@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import sqlite3
 import time
-from typing import Iterable, Dict, Any, List, Optional
+from collections.abc import Iterable
+from typing import Any
 
 from src.logging.json_logger import emit_log_event
 
@@ -35,14 +36,14 @@ INSERT_SQL = (
 SELECT_BASE = "SELECT " + ",".join(TX_COLUMNS) + " FROM transactions"
 
 
-def bulk_insert_transactions(db_path: str, rows: Iterable[Dict[str, Any]]) -> int:
+def bulk_insert_transactions(db_path: str, rows: Iterable[dict[str, Any]]) -> int:
     """Bulk insert rows; returns number of inserted (new) rows.
 
     Duplicate transaction_id rows are ignored.
     """
     start_time = time.time()
     rows_list = list(rows)
-    
+
     try:
         if not rows_list:
             # Log empty persistence
@@ -55,7 +56,7 @@ def bulk_insert_transactions(db_path: str, rows: Iterable[Dict[str, Any]]) -> in
                 "duration_ms": int((time.time() - start_time) * 1000)
             })
             return 0
-            
+
         con = sqlite3.connect(db_path)
         try:
             cur = con.executemany(
@@ -69,7 +70,7 @@ def bulk_insert_transactions(db_path: str, rows: Iterable[Dict[str, Any]]) -> in
             )
             con.commit()
             inserted_count = cur.rowcount if cur.rowcount is not None else 0
-            
+
             # Log successful persistence
             emit_log_event({
                 "stage": "persistence",
@@ -79,11 +80,11 @@ def bulk_insert_transactions(db_path: str, rows: Iterable[Dict[str, Any]]) -> in
                 "error_count": 0,
                 "duration_ms": int((time.time() - start_time) * 1000)
             })
-            
+
             return inserted_count
         finally:
             con.close()
-            
+
     except Exception as e:
         # Log failed persistence
         emit_log_event({
@@ -99,7 +100,7 @@ def bulk_insert_transactions(db_path: str, rows: Iterable[Dict[str, Any]]) -> in
         raise
 
 
-def get_transactions(db_path: str, *, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+def get_transactions(db_path: str, *, limit: int | None = None) -> list[dict[str, Any]]:
     sql = SELECT_BASE
     params: list[Any] = []
     if limit is not None:
@@ -109,7 +110,7 @@ def get_transactions(db_path: str, *, limit: Optional[int] = None) -> List[Dict[
     try:
         cur = con.execute(sql, params)
         rows = cur.fetchall()
-        result: List[Dict[str, Any]] = []
+        result: list[dict[str, Any]] = []
         for raw in rows:
             result.append({col: raw[i] for i, col in enumerate(TX_COLUMNS)})
         return result

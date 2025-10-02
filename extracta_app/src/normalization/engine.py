@@ -2,29 +2,28 @@
 from __future__ import annotations
 
 import time
-from typing import List, Dict, Any
-from datetime import datetime
+from typing import Any
 
-from src.normalization.validation import validate_rows
-from src.normalization.mapping import map_row
 from src.common.hashing import normalization_hash
 from src.logging.json_logger import emit_log_event
+from src.normalization.mapping import map_row
+from src.normalization.validation import validate_rows
 
 
 def normalize_rows(
-    raw_rows: List[Dict[str, Any]],
+    raw_rows: list[dict[str, Any]],
     *,
-    header_map: Dict[str, str],
+    header_map: dict[str, str],
     mapping_version: str,
     logic_version: str,
     source_file: str,
     source_file_hash: str,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     start_time = time.time()
-    
+
     try:
         validated, anomalies = validate_rows(raw_rows, required_columns=["Date", "Description", "Amount"])
-        
+
         # Log validation stage
         emit_log_event({
             "stage": "validation",
@@ -35,8 +34,8 @@ def normalize_rows(
             "duration_ms": int((time.time() - start_time) * 500),  # Partial time
             "source_file": source_file
         })
-        
-        normalized: List[Dict[str, Any]] = []
+
+        normalized: list[dict[str, Any]] = []
         for raw in validated:
             mapped = map_row(raw, header_map, source_file=source_file, source_file_hash=source_file_hash)
             if not mapped:
@@ -57,7 +56,7 @@ def normalize_rows(
                 logic_version=logic_version,
             )
             normalized.append(mapped)
-        
+
         # Log normalization stage
         emit_log_event({
             "stage": "normalization",
@@ -68,12 +67,12 @@ def normalize_rows(
             "duration_ms": int((time.time() - start_time) * 1000),
             "source_file": source_file
         })
-        
+
         # Sort normalized results by normalization_hash for deterministic ordering
         normalized.sort(key=lambda x: x["normalization_hash"])
-        
+
         return normalized
-        
+
     except Exception as e:
         # Log failed normalization
         emit_log_event({

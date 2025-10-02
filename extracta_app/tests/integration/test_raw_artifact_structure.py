@@ -1,6 +1,5 @@
-from pathlib import Path
-import pytest
 import hashlib
+from pathlib import Path
 
 try:
     from src.ingestion.pipeline import ingest_file  # type: ignore

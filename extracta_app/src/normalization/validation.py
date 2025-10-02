@@ -11,7 +11,7 @@ Returns (cleaned_rows, anomalies_list).
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Dict, Tuple, Any
+from typing import Any
 
 DATE_FORMATS = ["%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"]
 
@@ -25,12 +25,12 @@ def _normalize_date(value: str) -> str:
     raise ValueError(f"Unrecognized date format: {value}")
 
 
-def validate_rows(rows: List[Dict[str, Any]], required_columns: List[str]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+def validate_rows(rows: list[dict[str, Any]], required_columns: list[str]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     if not rows:
         raise ValueError("No rows extracted (empty input)")
     missing_cols = set(required_columns)
-    cleaned: List[Dict[str, Any]] = []
-    anomalies: List[Dict[str, Any]] = []
+    cleaned: list[dict[str, Any]] = []
+    anomalies: list[dict[str, Any]] = []
     for r in rows:
         if any(col not in r for col in required_columns):
             raise ValueError(f"Missing required columns in row: {r}")

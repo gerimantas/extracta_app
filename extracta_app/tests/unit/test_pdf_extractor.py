@@ -1,6 +1,5 @@
-from types import SimpleNamespace
 from pathlib import Path
-import pytest
+from types import SimpleNamespace
 
 try:
     from src.extraction.pdf_extractor import extract_raw_rows  # type: ignore

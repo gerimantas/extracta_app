@@ -1,7 +1,6 @@
 import hashlib
 from pathlib import Path
 
-
 try:
     from src.common.hashing import file_sha256, normalization_hash  # type: ignore
 except ImportError:  # Module not yet implemented (Task 12) or path issue

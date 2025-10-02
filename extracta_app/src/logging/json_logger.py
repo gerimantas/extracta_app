@@ -9,10 +9,10 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
-def emit_log_event(event_data: Dict[str, Any]) -> None:
+def emit_log_event(event_data: dict[str, Any]) -> None:
     """Emit a log event using the default logger instance."""
     logger = JsonLogger(Path("logs/pipeline.log"))
     logger.emit(event_data)
@@ -27,7 +27,7 @@ class JsonLogger:
     def __post_init__(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
-    def emit(self, event: Dict[str, Any]) -> None:
+    def emit(self, event: dict[str, Any]) -> None:
         evt = dict(event)  # shallow copy
         # Auto timestamp if missing
         evt.setdefault("ts", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))

@@ -1,5 +1,4 @@
 from pathlib import Path
-import pytest
 
 try:
     from src.extraction.image_extractor import extract_raw_rows  # type: ignore

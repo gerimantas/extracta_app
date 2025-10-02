@@ -1,6 +1,4 @@
-import json
 from pathlib import Path
-import pytest
 
 try:
     from src.persistence.migrations import init_db  # type: ignore
@@ -8,7 +6,7 @@ except ImportError:
     init_db = None  # type: ignore
 
 try:
-    from src.reporting.templates import save_template, get_template_by_name, list_templates  # type: ignore
+    from src.reporting.templates import get_template_by_name, list_templates, save_template  # type: ignore
 except ImportError:
     save_template = get_template_by_name = list_templates = None  # type: ignore
 

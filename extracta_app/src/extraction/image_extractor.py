@@ -10,10 +10,10 @@ Returns list of dicts with raw_text field.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 
-def extract_raw_rows(path: str) -> List[Dict[str, str]]:
+def extract_raw_rows(path: str) -> list[dict[str, str]]:
     """Extract raw OCR lines from an image file.
 
     Design goals:
@@ -22,7 +22,7 @@ def extract_raw_rows(path: str) -> List[Dict[str, str]]:
       Pillow to successfully open the image bytes.
     - Never raise; return empty list on total failure.
     """
-    rows: List[Dict[str, str]] = []
+    rows: list[dict[str, str]] = []
     p = Path(path)
 
     image_obj: Any = None
@@ -30,17 +30,18 @@ def extract_raw_rows(path: str) -> List[Dict[str, str]]:
     try:  # Lazy import dependencies so test monkeypatch stubs suffice.
         try:
             from PIL import Image  # type: ignore
+            image = Image
         except Exception:  # pragma: no cover - absence handled below
-            Image = None  # type: ignore
+            image = None  # type: ignore
         try:
             import pytesseract  # type: ignore
         except Exception:  # pragma: no cover
             pytesseract = None  # type: ignore
 
         # Attempt to open & grayscale; tolerate failures (minimal test fixtures)
-        if 'Image' in locals() and Image is not None:
+        if 'image' in locals() and image is not None:
             try:
-                with Image.open(p) as img:  # pragma: no cover (IO heavy)
+                with image.open(p) as img:  # pragma: no cover (IO heavy)
                     image_obj = img.convert('L')
             except Exception:
                 image_obj = None

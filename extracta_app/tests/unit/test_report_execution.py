@@ -1,6 +1,5 @@
 import uuid
 from pathlib import Path
-import pytest
 
 try:
     from src.persistence.migrations import init_db  # type: ignore

@@ -11,8 +11,7 @@ Rules:
 from __future__ import annotations
 
 import sqlite3
-from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 
 def _connect(db_path: str) -> sqlite3.Connection:
@@ -35,7 +34,7 @@ def create_category(db_path: str, name: str) -> int:
         con.close()
 
 
-def list_categories(db_path: str) -> List[Dict[str, Any]]:
+def list_categories(db_path: str) -> list[dict[str, Any]]:
     con = _connect(db_path)
     try:
         cur = con.execute("SELECT category_id, name, created_at FROM categories ORDER BY name")

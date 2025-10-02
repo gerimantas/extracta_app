@@ -1,4 +1,3 @@
-import pytest
 
 try:
     from src.normalization.mapping import map_row  # type: ignore

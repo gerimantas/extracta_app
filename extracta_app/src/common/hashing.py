@@ -17,8 +17,8 @@ tests that assert determinism.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from hashlib import sha256
-from typing import Iterable
 
 CHUNK_SIZE = 8192
 

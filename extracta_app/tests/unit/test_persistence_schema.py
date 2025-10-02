@@ -1,6 +1,5 @@
 import sqlite3
 from pathlib import Path
-import pytest
 
 # Task 31: Failing test first (no migrations implemented yet)
 try:

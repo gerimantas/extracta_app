@@ -10,13 +10,13 @@ from __future__ import annotations
 import hashlib
 import time
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
-from src.ingestion.router import detect_file_type
-from src.logging.json_logger import emit_log_event
 # Import extractor modules (not symbols) so tests can monkeypatch their
 # public functions via sys.modules lookups before calling ingest_file.
-from src.extraction import pdf_extractor, image_extractor  # type: ignore
+from src.extraction import image_extractor, pdf_extractor  # type: ignore
+from src.ingestion.router import detect_file_type
+from src.logging.json_logger import emit_log_event
 
 
 def _file_sha256(path: Path) -> str:
@@ -27,10 +27,10 @@ def _file_sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def ingest_file(path_str: str) -> Dict[str, Any]:
+def ingest_file(path_str: str) -> dict[str, Any]:
     path = Path(path_str)
     start_time = time.time()
-    
+
     try:
         if not path.exists():  # early safety
             raise FileNotFoundError(path)
@@ -49,7 +49,7 @@ def ingest_file(path_str: str) -> Dict[str, Any]:
             "record_count_raw": len(rows),
             "rows": rows,
         }
-        
+
         # Log successful ingestion
         emit_log_event({
             "stage": "ingestion",
@@ -60,9 +60,9 @@ def ingest_file(path_str: str) -> Dict[str, Any]:
             "duration_ms": int((time.time() - start_time) * 1000),
             "source_file": path.name
         })
-        
+
         return artifact
-        
+
     except Exception as e:
         # Log failed ingestion
         emit_log_event({

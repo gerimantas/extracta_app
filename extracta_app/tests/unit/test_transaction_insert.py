@@ -1,7 +1,6 @@
+import hashlib
 import uuid
 from pathlib import Path
-import pytest
-import hashlib
 
 try:
     from src.persistence.migrations import init_db  # type: ignore

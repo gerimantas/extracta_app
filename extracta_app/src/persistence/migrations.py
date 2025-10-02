@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
-from typing import Iterable
 
 CURRENT_SCHEMA_VERSION = 1
 CURRENT_APP_VERSION = "0.1.0"

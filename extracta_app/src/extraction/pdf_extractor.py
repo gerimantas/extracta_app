@@ -10,11 +10,10 @@ Returns a list of dicts: [{"raw_text": <line>}, ...]
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Dict
 
 
-def extract_raw_rows(path: str) -> List[Dict[str, str]]:
-    rows: List[Dict[str, str]] = []
+def extract_raw_rows(path: str) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
     p = Path(path)
     try:
         import pdfplumber  # type: ignore

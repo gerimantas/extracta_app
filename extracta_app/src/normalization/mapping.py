@@ -5,10 +5,8 @@ For MVP we implement single signed amount logic when header_map provides generic
 """
 from __future__ import annotations
 
-from typing import Dict, Any, Optional
 import uuid
-
-from src.common.hashing import normalization_hash
+from typing import Any
 
 
 def _parse_float(val) -> float:
@@ -18,7 +16,7 @@ def _parse_float(val) -> float:
         raise ValueError(f"Invalid numeric value: {val}") from exc
 
 
-def map_row(raw: Dict[str, Any], header_map: Dict[str, str], *, source_file: str, source_file_hash: str) -> Optional[Dict[str, Any]]:
+def map_row(raw: dict[str, Any], header_map: dict[str, str], *, source_file: str, source_file_hash: str) -> dict[str, Any] | None:
     # Must have date + description + either amount or amount_in/out
     if "Date" not in raw or "Description" not in raw:
         return None
