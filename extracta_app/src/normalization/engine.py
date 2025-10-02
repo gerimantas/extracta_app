@@ -69,6 +69,9 @@ def normalize_rows(
             "source_file": source_file
         })
         
+        # Sort normalized results by normalization_hash for deterministic ordering
+        normalized.sort(key=lambda x: x["normalization_hash"])
+        
         return normalized
         
     except Exception as e:
