@@ -56,6 +56,15 @@ from src.extraction import pdf_extractor, image_extractor
 
 ## Developer Workflows
 
+### Running the Application
+```bash
+# Start Streamlit UI server
+streamlit run extracta_app/src/ui/app.py
+
+# VS Code: Press F5 to launch Streamlit server with debugging
+# VS Code: Use task "start:streamlit" for background server
+```
+
 ### Testing Commands
 ```bash
 # Quick tests (preferred for TDD cycles)
