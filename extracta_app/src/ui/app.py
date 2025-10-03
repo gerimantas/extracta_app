@@ -11,8 +11,14 @@ Design: Thin UI layer, business logic in src/ modules.
 from __future__ import annotations
 
 import os
+import sys
 import tempfile
 from pathlib import Path
+
+# Add current directory to Python path to resolve src imports
+current_dir = Path(__file__).parent.parent.parent
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
 
 import streamlit as st
 
@@ -28,6 +34,61 @@ try:
 except ImportError as e:
     st.error(f"Import error: {e}")
     st.stop()
+
+
+def parse_raw_text_to_structured_data(raw_rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """
+    Parse raw_text rows into structured transaction data.
+    This is a simple parser - in production you'd want more sophisticated parsing.
+    """
+    import re
+    from datetime import datetime
+    
+    structured_rows = []
+    
+    for row in raw_rows:
+        raw_text = row.get('raw_text', '').strip()
+        if not raw_text:
+            continue
+            
+        # Simple parsing logic - look for patterns like:
+        # "€632.39 €31.62 2025-10-31" (amount amount date)
+        # or other common transaction patterns
+        
+        # Pattern 1: Look for amount and date
+        amount_date_pattern = r'€?(-?\d+[.,]\d+).*?(\d{4}-\d{2}-\d{2})'
+        match = re.search(amount_date_pattern, raw_text)
+        
+        if match:
+            amount_str = match.group(1).replace(',', '.')
+            date_str = match.group(2)
+            
+            # Extract description (everything before the amount/date part)
+            description = raw_text[:match.start()].strip()
+            if not description:
+                description = raw_text.replace(match.group(0), '').strip()
+                
+            if not description:
+                description = raw_text
+                
+            structured_rows.append({
+                "Date": date_str,
+                "Description": description,
+                "Amount": amount_str
+            })
+        else:
+            # Pattern 2: Look for just dates
+            date_pattern = r'(\d{4}-\d{2}-\d{2})'
+            date_match = re.search(date_pattern, raw_text)
+            
+            if date_match:
+                structured_rows.append({
+                    "Date": date_match.group(1),
+                    "Description": raw_text,
+                    "Amount": "0.00"
+                })
+    
+    return structured_rows
 
 
 def init_session_state():
@@ -74,6 +135,22 @@ def upload_section():
                         st.subheader("Raw Data Preview")
                         st.dataframe(raw_artifact['rows'][:10])  # Show first 10 rows
 
+                    # Parse raw text into structured data
+                    parsed_rows = []
+                    with st.spinner("Parsing extracted text..."):
+                        parsed_rows = parse_raw_text_to_structured_data(raw_artifact['rows'])
+                        
+                        if parsed_rows:
+                            st.subheader("Parsed Structured Data")
+                            st.dataframe(parsed_rows[:10])  # Show first 10 parsed rows
+                        else:
+                            st.warning("⚠️ Could not parse structured data from extracted text. Using mock data for demo.")
+                            # Fallback to mock data for demonstration
+                            parsed_rows = [
+                                {"Date": "2025-10-01", "Description": "Sample Transaction 1", "Amount": "-25.50"},
+                                {"Date": "2025-10-02", "Description": "Sample Transaction 2", "Amount": "-45.00"}
+                            ]
+
                     # Normalize data
                     with st.spinner("Normalizing data..."):
                         # Load mapping config (you might want to make this configurable)
@@ -84,7 +161,7 @@ def upload_section():
                         }}
 
                         normalized_rows = normalize_rows(
-                            raw_artifact['rows'],
+                            parsed_rows,  # Use parsed data instead of raw
                             header_map=mapping_config['rules'],
                             mapping_version=mapping_config['version'],
                             logic_version="0.1.0",

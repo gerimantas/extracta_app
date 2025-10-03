@@ -8,6 +8,10 @@ Extracta is a **deterministic, local-first financial data normalization pipeline
 Raw Files → Ingestion → Extraction → Validation → Normalization → SQLite → Categorization → Reporting
 ```
 
+### Environment Variables
+- `EXTRACTA_DB_PATH`: Override default SQLite database location (default: `data/extracta.db`)
+- System requires Tesseract OCR in PATH for image processing
+
 ## Project Structure & Conventions
 
 ### Module Organization
@@ -61,6 +65,17 @@ from src.extraction import pdf_extractor, image_extractor
 .venv\Scripts\python.exe -m pytest -vv
 
 # Or use VS Code tasks: "tests:quick", "tests:verbose"
+# PowerShell script (Windows): scripts\run_tests.ps1
+```
+
+### Code Quality Tools
+```bash
+# Linting with ruff (line-length: 120, target: py312)
+ruff check extracta_app/
+ruff format extracta_app/
+
+# Type checking with mypy (configuration in mypy.ini)
+mypy extracta_app/src/
 ```
 
 ### Key Dependencies & Technology Decisions (Q1-Q10 Resolved)
@@ -70,6 +85,8 @@ from src.extraction import pdf_extractor, image_extractor
 - **streamlit**: UI layer (thin, business logic in src/)
 - **PyYAML**: Mapping configuration (Q3: YAML format for human readability)
 - **sqlite3**: Database with env override `EXTRACTA_DB_PATH` (Q4: default `data/extracta.db`)
+- **ruff**: Linting and formatting (120 char line length, Python 3.12 target)
+- **mypy**: Static type checking with strict configuration
 
 ### Research-Driven Architecture Decisions (from specs/extracta-core/research.md)
 - **Category Model (Q5)**: Dedicated `categories` table with FK from transactions
@@ -100,6 +117,9 @@ SQLite `transactions` table is append-only. Categorization updates only the `cat
 ### JSON Logging
 `src/logging/json_logger.py` emits schema-compliant log lines with auto-timestamping and configurable stack trace truncation (default: 20 lines).
 
+### UI Architecture Pattern
+Streamlit UI (`src/ui/app.py`) follows thin-layer pattern: all business logic in `src/` modules, UI handles only presentation and user interaction. Imports use `from src.module import function` pattern.
+
 ## Working with This Codebase
 
 ### Implementation Status (v0.1.0)
@@ -124,6 +144,9 @@ python -m pytest tests/integration/ -v
 
 # Schema validation during development
 python -c "import jsonschema; ..."  # See contract tests for examples
+
+# PowerShell convenience script (Windows)
+scripts\run_tests.ps1
 ```
 
 ## Key Files for Context
