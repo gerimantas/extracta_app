@@ -5,3 +5,17 @@ __pycache__/
 .vscode/
 .venv*
 venv/
+# Data & runtime artifacts
+data/*.db
+extracta_app/data/*.db
+logs/*.log
+artifacts/
+
+# SQLite journal / wal
+*.sqlite-journal
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Report / acceptance generated files
+artifacts/**
