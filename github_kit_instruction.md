@@ -196,6 +196,7 @@ def test_acceptance_reporting_flow():
 |---------|--------------|----------|---------|-----------|-------|
 ```
 14.2. Automatinė generacija (pasirinktinė) – galima parašyti skriptą, kuris sujungia tasks + test failų pavadinimus.
+14.3. Validacija – `scripts/validate_traceability.py` turi būti paleistas CI; FAIL jei kuris nors Task ID neatsiranda matricoje. Tai blokuoja PR.
 
 ---
 ## 15. Versijavimas ir Migracijos
@@ -262,6 +263,15 @@ Deferred: ...
 | Nėra determinism test | Šablone privaloma sekcija |
 | Migracija ne idempotentinė | Dvigubas init testas |
 | Acceptance test praleistas | Git hook tikrina failo egzistavimą |
+| DB ar log failai įtraukti į commit | `.gitignore` saugo `data/*.db` ir `logs/*.log`; naudoti `git rm --cached` |
+
+---
+### Papildoma Pastaba: Runtime Artefaktai
+SQLite DB ir log'ai neturi būti versionuojami. Jei netyčia įtraukti:
+```
+git rm --cached data/extracta.db logs/pipeline.log
+```
+Tada commit su žinute `chore: untrack runtime artifacts`.
 
 ---
 ## 23. Greita „Cheat Sheet“ Santrauka

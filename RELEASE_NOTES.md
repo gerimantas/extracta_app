@@ -236,3 +236,18 @@ streamlit run extracta_app/src/ui/app.py
 ---
 
 **Extracta v0.1.0** represents a solid foundation for local financial data processing with a focus on data integrity, deterministic behavior, and user control. The architecture supports extensibility while maintaining simplicity and reliability.
+
+---
+## Post-0.1.0 (Merged to main, pending next tag)
+
+The following capabilities have been merged after the 0.1.0 tag and will be formalized in the next version bump (planned 0.2.0):
+
+- Document registry (schema v2) with deterministic backfill
+- Counterparty heuristic derivation (merge / rename operations)
+- Extended logging events: document_create, document_delete, counterparty_merge, counterparty_rename, counterparty_autoderive_fail
+- Determinism guard negative-control test (ensures hash changes on mutation)
+- Traceability matrix & validation script enforcing spec→plan→tasks→tests lineage
+- PR template enforcing quality gates
+- Removal of runtime artifacts (SQLite DB, logs) from version control
+
+Until the new tag is created, these features exist on `main` with the application-reported version still `0.1.0`. The subsequent release will increment MINOR to signal backward‑compatible feature expansion.

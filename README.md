@@ -1,6 +1,7 @@
 # Extracta Financial Data Pipeline
 
-**Version:** 0.1.0
+**Version:** 0.1.0  
+Status: Core pipeline + Advanced Document & Counterparty Management (Feature 002) integrated.
 
 Extracta is a deterministic, local-first financial data normalization pipeline that transforms heterogeneous financial documents (PDFs, images) into a unified, queryable transaction dataset.
 
@@ -19,6 +20,8 @@ Raw Files → Ingestion → Extraction → Validation → Normalization → SQLi
 - **Local-First**: No external services required, all processing happens locally
 - **Multi-Format Support**: PDF documents and images (PNG, JPG, JPEG)
 - **Streamlit UI**: User-friendly interface for file upload, transaction management, and reporting
+- **Document Registry (v2)**: Persistent `documents` table with source file hashing & idempotent backfill
+- **Counterparty Derivation (v2)**: Deterministic heuristic to extract counterparties (merge/rename support)
 - **Categorization**: Assign custom categories to transactions
 - **Reporting**: Flexible query builder with grouping and aggregation
 - **Template System**: Save and reuse report configurations
@@ -69,6 +72,7 @@ Navigate to `http://localhost:8501` in your browser.
 - Files are processed immediately upon upload
 
 ### 2. Review Transactions
+	- Counterparty column (if derived) indicates heuristic result; unknowns can be renamed/merged later
 - Navigate to **Transactions** section
 - Review normalized transaction data
 - Assign categories to transactions
@@ -151,23 +155,24 @@ python -m pytest tests/contract/
 
 ```
 extracta_app/
-├── src/                    # Source code
-│   ├── ingestion/         # File processing pipeline
-│   ├── extraction/        # PDF and image extractors
-│   ├── normalization/     # Data validation and mapping
-│   ├── persistence/       # SQLite repository layer
-│   ├── categorization/    # Transaction categorization
-│   ├── reporting/         # Query builder and execution
-│   ├── ui/               # Streamlit interface
-│   ├── logging/          # JSON logging system
-│   └── common/           # Shared utilities
-├── tests/                 # Test suite
-│   ├── unit/             # Unit tests
-│   ├── integration/      # Integration tests
-│   ├── contract/         # Schema validation tests
-│   └── tooling/          # Development tool tests
-├── contracts/            # JSON schemas
-└── specs/               # Documentation and specifications
+├── src/                      # Source code
+│   ├── ingestion/            # File processing pipeline
+│   ├── extraction/           # PDF and image extractors
+│   ├── normalization/        # Validation, mapping, counterparty heuristic (v2)
+│   ├── persistence/          # SQLite repositories & migrations (idempotent)
+│   ├── document_management/  # (Future) extended doc ops placeholder
+│   ├── categorization/       # Transaction categorization
+│   ├── reporting/            # Query builder and execution
+│   ├── ui/                   # Streamlit interface (includes document & counterparty sections)
+│   ├── logging/              # JSON logging system
+│   └── common/               # Shared utilities
+├── tests/                    # Test suite
+│   ├── unit/                 # Unit tests
+│   ├── integration/          # Integration tests (incl. determinism & derivation)
+│   ├── contract/             # Schema validation tests
+│   └── tooling/              # Development tool tests
+├── contracts/                # JSON schemas
+└── specs/                    # Documentation and specifications
 ```
 
 ### Code Quality
@@ -183,6 +188,16 @@ Run quality checks:
 ruff check extracta_app/
 mypy extracta_app/src/
 ```
+
+### Runtime Artifacts & Local State
+The SQLite DB and pipeline logs are intentionally NOT tracked in Git. They are ignored via `.gitignore`.
+
+Reset local database (non-destructive to code):
+```bash
+rm data/extracta.db  # or del on Windows
+python -c "from extracta_app.src.persistence.migrations import init_db; init_db()"
+```
+All migrations are idempotent; re-running `init_db()` will create missing structures only.
 
 ## License
 
